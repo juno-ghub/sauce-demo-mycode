@@ -1,0 +1,1095 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 22-Jun-2026 at 14:19:14 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">24 tests took 00:06:59.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" >
+            <span class="failed">1 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">23 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.14.5&#34;, &#34;Platform&#34;: &#34;Windows-10-10.0.19044-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.1.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;allure-pytest&#34;: &#34;2.16.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;tests/test_cart.py::TestCartPagePositive::test_view_cart_with_items&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPagePositive::test_view_cart_with_items&#34;, &#34;duration&#34;: &#34;00:00:18&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPagePositive::test_view_cart_with_items&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:18&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:12:16,298 - conftest - INFO - Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\screenshots\n2026-06-22 14:12:16,299 - conftest - INFO - Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\reports\n2026-06-22 14:12:16,300 - conftest - INFO - Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\allure-results\n2026-06-22 14:12:16,301 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:12:16,420 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:12:18,307 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:12:21,350 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:12:29,571 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:12:29,571 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:12:29,572 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:12:30,000 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:12:30,001 - pages.login_page - INFO - Entering password\n2026-06-22 14:12:30,265 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:12:30,265 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:12:30,674 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:12:30,688 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:12:31,028 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:12:31,156 - pages.products_page - INFO - Added product at index 1 to cart\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:26 Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\screenshots\nINFO     conftest:conftest.py:26 Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\reports\nINFO     conftest:conftest.py:26 Directory ensured: C:\\Users\\JaelN\\SauceDemo_Automation\\allure-results\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:12:31,158 - tests.test_cart - INFO - Starting test: View cart with items\n2026-06-22 14:12:31,158 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:12:31,159 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:12:31,345 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:12:31,345 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:12:31,402 - pages.cart_page - INFO - Cart page loaded: True\n2026-06-22 14:12:31,422 - pages.cart_page - INFO - Total items in cart: 2\n2026-06-22 14:12:31,423 - tests.test_cart - INFO - Test passed: Cart with items viewed successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:34 Starting test: View cart with items\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:33 Cart page loaded: True\nINFO     pages.cart_page:cart_page.py:45 Total items in cart: 2\nINFO     tests.test_cart:test_cart.py:47 Test passed: Cart with items viewed successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:12:31,425 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_cart.py::TestCartPagePositive::test_cart_displays_correct_item_names&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPagePositive::test_cart_displays_correct_item_names&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPagePositive::test_cart_displays_correct_item_names&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:12:34,390 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:12:34,391 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:12:35,673 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:12:37,893 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:12:44,691 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:12:44,691 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:12:44,692 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:12:45,110 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:12:45,111 - pages.login_page - INFO - Entering password\n2026-06-22 14:12:45,355 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:12:45,355 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:12:45,645 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:12:45,647 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:12:45,999 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:12:46,135 - pages.products_page - INFO - Added product at index 1 to cart\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:12:46,137 - tests.test_cart - INFO - Starting test: Cart displays correct item names\n2026-06-22 14:12:46,137 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:12:46,137 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:12:46,314 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:12:46,314 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:12:47,001 - pages.cart_page - INFO - Cart item names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;]\n2026-06-22 14:12:47,001 - tests.test_cart - INFO - Test passed: Cart items: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:51 Starting test: Cart displays correct item names\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:57 Cart item names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;]\nINFO     tests.test_cart:test_cart.py:63 Test passed: Cart items: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;]\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:12:47,004 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_cart.py::TestCartPagePositive::test_remove_item_from_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPagePositive::test_remove_item_from_cart&#34;, &#34;duration&#34;: &#34;00:00:26&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPagePositive::test_remove_item_from_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:26&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;tests\\test_cart.py:78: in test_remove_item_from_cart\n    cart_page.remove_item_from_cart(0)\npages\\cart_page.py:81: in remove_item_from_cart\n    button = items[item_index].find_element(By.XPATH, &amp;quot;.//button[contains(@class, &amp;#x27;btn_danger&amp;#x27;)]&amp;quot;)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n..\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\selenium\\webdriver\\remote\\webelement.py:532: in find_element\n    return self._execute(Command.FIND_CHILD_ELEMENT, {&amp;quot;using&amp;quot;: by, &amp;quot;value&amp;quot;: value})[&amp;quot;value&amp;quot;]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n..\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\selenium\\webdriver\\remote\\webelement.py:508: in _execute\n    return self._parent.execute(command, params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n..\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\selenium\\webdriver\\remote\\webdriver.py:492: in execute\n    self.error_handler.check_response(response)\n..\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\selenium\\webdriver\\remote\\errorhandler.py:232: in check_response\n    raise exception_class(message, screen, stacktrace)\nE   selenium.common.exceptions.NoSuchElementException: Message: no such element: Unable to locate element: {&amp;quot;method&amp;quot;:&amp;quot;xpath&amp;quot;,&amp;quot;selector&amp;quot;:&amp;quot;.//button[contains(@class, &amp;#x27;btn_danger&amp;#x27;)]&amp;quot;}\nE     (Session info: chrome=145.0.7632.116); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception\nE   Stacktrace:\nE   Symbols not available. Dumping unresolved backtrace:\nE   \t0x7ff7b444aa55\nE   \t0x7ff7b41a8630\nE   \t0x7ff7b3f3d75d\nE   \t0x7ff7b3f9862e\nE   \t0x7ff7b3f9893c\nE   \t0x7ff7b3f8adfc\nE   \t0x7ff7b3f8aca6\nE   \t0x7ff7b3fe591c\nE   \t0x7ff7b3f89098\nE   \t0x7ff7b3f89f83\nE   \t0x7ff7b4477810\nE   \t0x7ff7b4471afd\nE   \t0x7ff7b4492c1a\nE   \t0x7ff7b41c3345\nE   \t0x7ff7b41cb81c\nE   \t0x7ff7b41b1924\nE   \t0x7ff7b41b1ad6\nE   \t0x7ff7b4197e47\nE   \t0x7ffe40237614\nE   \t0x7ffe405426f1\n\n---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:12:50,079 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:12:50,080 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:12:51,428 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:12:53,857 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:13:01,086 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:13:01,087 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:13:01,087 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:13:01,482 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:13:01,483 - pages.login_page - INFO - Entering password\n2026-06-22 14:13:01,734 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:13:01,735 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:13:02,021 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:13:02,023 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:13:02,307 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:13:02,453 - pages.products_page - INFO - Added product at index 1 to cart\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:13:02,455 - tests.test_cart - INFO - Starting test: Remove item from cart\n2026-06-22 14:13:02,456 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:13:02,456 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:13:02,645 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:13:02,646 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:13:02,673 - pages.cart_page - INFO - Total items in cart: 2\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:67 Starting test: Remove item from cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:45 Total items in cart: 2\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:13:13,514 - conftest - ERROR - Screenshot saved: C:\\Users\\JaelN\\SauceDemo_Automation\\screenshots\\test_remove_item_from_cart_20260622_141313.png\n2026-06-22 14:13:13,518 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_cart.py::TestCartPagePositive::test_continue_shopping_from_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPagePositive::test_continue_shopping_from_cart&#34;, &#34;duration&#34;: &#34;00:00:15&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPagePositive::test_continue_shopping_from_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:15&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:13:16,646 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:13:16,647 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:13:17,961 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:13:19,969 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:13:26,545 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:13:26,546 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:13:26,546 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:13:26,970 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:13:26,970 - pages.login_page - INFO - Entering password\n2026-06-22 14:13:27,200 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:13:27,200 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:13:27,492 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:13:27,494 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:13:27,748 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:13:27,902 - pages.products_page - INFO - Added product at index 1 to cart\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:13:27,904 - tests.test_cart - INFO - Starting test: Continue shopping from cart\n2026-06-22 14:13:27,904 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:13:27,904 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:13:28,090 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:13:28,091 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:13:28,091 - pages.cart_page - INFO - Clicking continue shopping button\n2026-06-22 14:13:28,252 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue-shopping&amp;#x27;)\n2026-06-22 14:13:28,260 - tests.test_cart - INFO - Test passed: Continued shopping successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:87 Starting test: Continue shopping from cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:106 Clicking continue shopping button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue-shopping&amp;#x27;)\nINFO     tests.test_cart:test_cart.py:99 Test passed: Continued shopping successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:13:28,263 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_cart.py::TestCartPageNegative::test_empty_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPageNegative::test_empty_cart&#34;, &#34;duration&#34;: &#34;00:00:25&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPageNegative::test_empty_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:25&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:13:31,232 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:13:31,233 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:13:32,483 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:13:34,226 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:13:34,228 - tests.test_cart - INFO - Starting test: View empty cart\n2026-06-22 14:13:41,465 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:13:41,465 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:13:41,466 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:13:41,861 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:13:41,862 - pages.login_page - INFO - Entering password\n2026-06-22 14:13:42,106 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:13:42,106 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:13:42,412 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:13:42,415 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:13:42,415 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:13:42,730 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:13:42,731 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:13:52,843 - pages.cart_page - INFO - Total items in cart: 0\n2026-06-22 14:13:52,843 - tests.test_cart - INFO - Test passed: Empty cart displayed successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:109 Starting test: View empty cart\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:45 Total items in cart: 0\nINFO     tests.test_cart:test_cart.py:124 Test passed: Empty cart displayed successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:13:52,853 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_cart.py::TestCartPageNegative::test_remove_item_by_invalid_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cart.py::TestCartPageNegative::test_remove_item_by_invalid_name&#34;, &#34;duration&#34;: &#34;00:00:15&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cart.py::TestCartPageNegative::test_remove_item_by_invalid_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:15&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:13:56,372 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:13:56,373 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:13:57,713 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:13:59,736 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:14:07,077 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:14:07,077 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:14:07,078 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:14:07,495 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:14:07,496 - pages.login_page - INFO - Entering password\n2026-06-22 14:14:07,748 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:14:07,749 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:14:08,038 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:14:08,040 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:14:08,397 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:14:08,543 - pages.products_page - INFO - Added product at index 1 to cart\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:14:08,545 - tests.test_cart - INFO - Starting test: Remove invalid item from cart\n2026-06-22 14:14:08,546 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:14:08,546 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:14:08,727 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n2026-06-22 14:14:08,727 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:14:08,795 - pages.cart_page - INFO - Total items in cart: 2\n2026-06-22 14:14:08,887 - pages.cart_page - WARNING - Item &amp;#x27;InvalidItem&amp;#x27; not found in cart\n2026-06-22 14:14:08,903 - pages.cart_page - INFO - Total items in cart: 2\n2026-06-22 14:14:08,903 - tests.test_cart - INFO - Test passed: Invalid item removal handled correctly\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_cart:test_cart.py:128 Starting test: Remove invalid item from cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:45 Total items in cart: 2\nWARNING  pages.cart_page:cart_page.py:102 Item &amp;#x27;InvalidItem&amp;#x27; not found in cart\nINFO     pages.cart_page:cart_page.py:45 Total items in cart: 2\nINFO     tests.test_cart:test_cart.py:143 Test passed: Invalid item removal handled correctly\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:14:08,907 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_checkout.py::TestCheckoutPositive::test_complete_checkout_flow&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_checkout.py::TestCheckoutPositive::test_complete_checkout_flow&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_checkout.py::TestCheckoutPositive::test_complete_checkout_flow&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:14:11,644 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:14:11,645 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:14:12,959 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:14:15,169 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:14:21,215 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:14:21,215 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:14:21,215 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:14:21,639 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:14:21,640 - pages.login_page - INFO - Entering password\n2026-06-22 14:14:21,900 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:14:21,900 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:14:22,189 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:14:22,192 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:14:22,441 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:14:22,442 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:14:22,779 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:14:22,786 - tests.test_checkout - INFO - Starting test: Complete checkout flow\n2026-06-22 14:14:22,788 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:14:22,788 - pages.cart_page - INFO - Clicking checkout button\n2026-06-22 14:14:22,982 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\n2026-06-22 14:14:22,982 - pages.checkout_page - INFO - CheckoutPage initialized\n2026-06-22 14:14:22,983 - pages.checkout_page - INFO - Filling checkout information\n2026-06-22 14:14:22,983 - pages.checkout_page - INFO - Entering first name: John\n2026-06-22 14:14:23,200 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\n2026-06-22 14:14:23,200 - pages.checkout_page - INFO - Entering last name: Doe\n2026-06-22 14:14:23,424 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\n2026-06-22 14:14:23,425 - pages.checkout_page - INFO - Entering postal code: 12345\n2026-06-22 14:14:23,635 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\n2026-06-22 14:14:23,635 - pages.checkout_page - INFO - Clicking continue button\n2026-06-22 14:14:24,364 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\n2026-06-22 14:14:24,367 - pages.checkout_page - INFO - Clicking finish button\n2026-06-22 14:14:24,563 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;finish&amp;#x27;)\n2026-06-22 14:14:24,622 - pages.checkout_page - INFO - Order confirmation displayed: True\n2026-06-22 14:14:24,622 - tests.test_checkout - INFO - Test passed: Checkout flow completed successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_checkout:test_checkout.py:35 Starting test: Complete checkout flow\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:111 Clicking checkout button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:29 CheckoutPage initialized\nINFO     pages.checkout_page:checkout_page.py:70 Filling checkout information\nINFO     pages.checkout_page:checkout_page.py:38 Entering first name: John\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\nINFO     pages.checkout_page:checkout_page.py:48 Entering last name: Doe\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\nINFO     pages.checkout_page:checkout_page.py:58 Entering postal code: 12345\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\nINFO     pages.checkout_page:checkout_page.py:77 Clicking continue button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:82 Clicking finish button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;finish&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:115 Order confirmation displayed: True\nINFO     tests.test_checkout:test_checkout.py:54 Test passed: Checkout flow completed successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:14:24,625 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_checkout.py::TestCheckoutPositive::test_checkout_with_valid_information&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_checkout.py::TestCheckoutPositive::test_checkout_with_valid_information&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_checkout.py::TestCheckoutPositive::test_checkout_with_valid_information&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:14:27,671 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:14:27,673 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:14:28,985 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:14:31,205 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:14:38,313 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:14:38,314 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:14:38,314 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:14:38,720 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:14:38,721 - pages.login_page - INFO - Entering password\n2026-06-22 14:14:38,983 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:14:38,983 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:14:39,309 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:14:39,323 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:14:39,544 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:14:39,544 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:14:39,765 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:14:39,774 - tests.test_checkout - INFO - Starting test: Checkout with valid information\n2026-06-22 14:14:39,775 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:14:39,775 - pages.cart_page - INFO - Clicking checkout button\n2026-06-22 14:14:39,995 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\n2026-06-22 14:14:39,997 - pages.checkout_page - INFO - CheckoutPage initialized\n2026-06-22 14:14:39,997 - pages.checkout_page - INFO - Entering first name: Jane\n2026-06-22 14:14:40,235 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): Jane\n2026-06-22 14:14:40,235 - pages.checkout_page - INFO - Entering last name: Smith\n2026-06-22 14:14:40,451 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Smith\n2026-06-22 14:14:40,452 - pages.checkout_page - INFO - Entering postal code: 54321\n2026-06-22 14:14:40,679 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 54321\n2026-06-22 14:14:40,679 - pages.checkout_page - INFO - Clicking continue button\n2026-06-22 14:14:40,914 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\n2026-06-22 14:14:40,932 - tests.test_checkout - INFO - Test passed: Valid checkout information accepted\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_checkout:test_checkout.py:58 Starting test: Checkout with valid information\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:111 Clicking checkout button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:29 CheckoutPage initialized\nINFO     pages.checkout_page:checkout_page.py:38 Entering first name: Jane\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): Jane\nINFO     pages.checkout_page:checkout_page.py:48 Entering last name: Smith\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Smith\nINFO     pages.checkout_page:checkout_page.py:58 Entering postal code: 54321\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 54321\nINFO     pages.checkout_page:checkout_page.py:77 Clicking continue button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\nINFO     tests.test_checkout:test_checkout.py:76 Test passed: Valid checkout information accepted\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:14:40,939 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_first_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_first_name&#34;, &#34;duration&#34;: &#34;00:00:17&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_first_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:17&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:14:43,803 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:14:43,804 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:14:45,136 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:14:47,876 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:14:54,917 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:14:54,917 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:14:54,918 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:14:55,336 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:14:55,336 - pages.login_page - INFO - Entering password\n2026-06-22 14:14:55,613 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:14:55,613 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:14:55,899 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:14:55,901 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:14:56,162 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:14:56,163 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:14:56,379 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:14:56,381 - tests.test_checkout - INFO - Starting test: Checkout with empty first name\n2026-06-22 14:14:56,385 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:14:56,385 - pages.cart_page - INFO - Clicking checkout button\n2026-06-22 14:14:56,585 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\n2026-06-22 14:14:56,586 - pages.checkout_page - INFO - CheckoutPage initialized\n2026-06-22 14:14:56,586 - pages.checkout_page - INFO - Entering last name: Doe\n2026-06-22 14:14:56,812 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\n2026-06-22 14:14:56,812 - pages.checkout_page - INFO - Entering postal code: 12345\n2026-06-22 14:14:57,036 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\n2026-06-22 14:14:57,036 - pages.checkout_page - INFO - Clicking continue button\n2026-06-22 14:14:57,454 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\n2026-06-22 14:14:57,507 - pages.checkout_page - INFO - Error message displayed: True\n2026-06-22 14:14:57,557 - pages.checkout_page - INFO - Error message: Error: First Name is required\n2026-06-22 14:14:57,557 - tests.test_checkout - INFO - Test passed: Error displayed for empty first name\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_checkout:test_checkout.py:86 Starting test: Checkout with empty first name\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:111 Clicking checkout button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:29 CheckoutPage initialized\nINFO     pages.checkout_page:checkout_page.py:48 Entering last name: Doe\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\nINFO     pages.checkout_page:checkout_page.py:58 Entering postal code: 12345\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\nINFO     pages.checkout_page:checkout_page.py:77 Clicking continue button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:104 Error message displayed: True\nINFO     pages.checkout_page:checkout_page.py:93 Error message: Error: First Name is required\nINFO     tests.test_checkout:test_checkout.py:102 Test passed: Error displayed for empty first name\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:14:57,559 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_last_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_last_name&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_last_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:15:00,449 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:15:00,449 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:15:01,766 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:15:04,418 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:15:10,801 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:15:10,802 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:15:10,803 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:15:11,206 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:15:11,206 - pages.login_page - INFO - Entering password\n2026-06-22 14:15:11,487 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:15:11,487 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:15:11,765 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:15:11,771 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:15:12,080 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:15:12,081 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:15:12,289 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:15:12,368 - tests.test_checkout - INFO - Starting test: Checkout with empty last name\n2026-06-22 14:15:12,369 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:15:12,369 - pages.cart_page - INFO - Clicking checkout button\n2026-06-22 14:15:12,559 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\n2026-06-22 14:15:12,560 - pages.checkout_page - INFO - CheckoutPage initialized\n2026-06-22 14:15:12,561 - pages.checkout_page - INFO - Entering first name: John\n2026-06-22 14:15:12,790 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\n2026-06-22 14:15:12,791 - pages.checkout_page - INFO - Entering postal code: 12345\n2026-06-22 14:15:13,053 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\n2026-06-22 14:15:13,053 - pages.checkout_page - INFO - Clicking continue button\n2026-06-22 14:15:13,323 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\n2026-06-22 14:15:13,364 - pages.checkout_page - INFO - Error message displayed: True\n2026-06-22 14:15:13,413 - pages.checkout_page - INFO - Error message: Error: Last Name is required\n2026-06-22 14:15:13,413 - tests.test_checkout - INFO - Test passed: Error displayed for empty last name\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_checkout:test_checkout.py:106 Starting test: Checkout with empty last name\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:111 Clicking checkout button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:29 CheckoutPage initialized\nINFO     pages.checkout_page:checkout_page.py:38 Entering first name: John\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\nINFO     pages.checkout_page:checkout_page.py:58 Entering postal code: 12345\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;postal-code&amp;#x27;): 12345\nINFO     pages.checkout_page:checkout_page.py:77 Clicking continue button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:104 Error message displayed: True\nINFO     pages.checkout_page:checkout_page.py:93 Error message: Error: Last Name is required\nINFO     tests.test_checkout:test_checkout.py:122 Test passed: Error displayed for empty last name\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:15:13,521 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_postal_code&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_postal_code&#34;, &#34;duration&#34;: &#34;00:00:18&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_checkout.py::TestCheckoutNegative::test_checkout_with_empty_postal_code&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:18&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:15:16,396 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:15:16,397 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:15:17,684 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:15:19,925 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:15:27,691 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:15:27,692 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:15:27,692 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:15:28,078 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:15:28,078 - pages.login_page - INFO - Entering password\n2026-06-22 14:15:28,345 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:15:28,346 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:15:28,645 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:15:28,651 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:15:28,875 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:15:28,875 - pages.products_page - INFO - Going to cart page\n2026-06-22 14:15:29,079 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:113 Going to cart page\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_link&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:15:29,080 - tests.test_checkout - INFO - Starting test: Checkout with empty postal code\n2026-06-22 14:15:29,082 - pages.cart_page - INFO - CartPage initialized\n2026-06-22 14:15:29,083 - pages.cart_page - INFO - Clicking checkout button\n2026-06-22 14:15:29,295 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\n2026-06-22 14:15:29,295 - pages.checkout_page - INFO - CheckoutPage initialized\n2026-06-22 14:15:29,295 - pages.checkout_page - INFO - Entering first name: John\n2026-06-22 14:15:29,509 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\n2026-06-22 14:15:29,509 - pages.checkout_page - INFO - Entering last name: Doe\n2026-06-22 14:15:29,720 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\n2026-06-22 14:15:29,720 - pages.checkout_page - INFO - Clicking continue button\n2026-06-22 14:15:29,936 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\n2026-06-22 14:15:29,997 - pages.checkout_page - INFO - Error message displayed: True\n2026-06-22 14:15:30,048 - pages.checkout_page - INFO - Error message: Error: Postal Code is required\n2026-06-22 14:15:30,048 - tests.test_checkout - INFO - Test passed: Error displayed for empty postal code\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_checkout:test_checkout.py:126 Starting test: Checkout with empty postal code\nINFO     pages.cart_page:cart_page.py:23 CartPage initialized\nINFO     pages.cart_page:cart_page.py:111 Clicking checkout button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;checkout&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:29 CheckoutPage initialized\nINFO     pages.checkout_page:checkout_page.py:38 Entering first name: John\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;first-name&amp;#x27;): John\nINFO     pages.checkout_page:checkout_page.py:48 Entering last name: Doe\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;last-name&amp;#x27;): Doe\nINFO     pages.checkout_page:checkout_page.py:77 Clicking continue button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;continue&amp;#x27;)\nINFO     pages.checkout_page:checkout_page.py:104 Error message displayed: True\nINFO     pages.checkout_page:checkout_page.py:93 Error message: Error: Postal Code is required\nINFO     tests.test_checkout:test_checkout.py:142 Test passed: Error displayed for empty postal code\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:15:30,358 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginPositive::test_login_with_valid_credentials&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginPositive::test_login_with_valid_credentials&#34;, &#34;duration&#34;: &#34;00:00:24&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginPositive::test_login_with_valid_credentials&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:24&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:15:34,714 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:15:34,715 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:15:37,769 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:15:40,018 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:15:40,020 - tests.test_login - INFO - Starting test: Login with valid credentials\n2026-06-22 14:15:53,862 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:15:53,969 - pages.login_page - INFO - Login page loaded: True\n2026-06-22 14:15:53,969 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:15:53,969 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:15:54,322 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:15:54,323 - pages.login_page - INFO - Entering password\n2026-06-22 14:15:54,626 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:15:54,626 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:15:55,284 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:15:55,376 - tests.test_login - INFO - Test passed: Successfully logged in with valid credentials\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:17 Starting test: Login with valid credentials\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:90 Login page loaded: True\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     tests.test_login:test_login.py:30 Test passed: Successfully logged in with valid credentials\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:15:55,433 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginPositive::test_login_page_elements_displayed&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginPositive::test_login_page_elements_displayed&#34;, &#34;duration&#34;: &#34;00:00:13&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginPositive::test_login_page_elements_displayed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:13&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:15:58,727 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:15:58,728 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:16:00,062 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:16:02,052 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:16:02,058 - tests.test_login - INFO - Starting test: Login page elements displayed\n2026-06-22 14:16:08,834 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:16:08,901 - pages.login_page - INFO - Login page loaded: True\n2026-06-22 14:16:09,024 - tests.test_login - INFO - Test passed: All login page elements are displayed\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:34 Starting test: Login page elements displayed\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:90 Login page loaded: True\nINFO     tests.test_login:test_login.py:44 Test passed: All login page elements are displayed\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:16:09,027 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginNegative::test_login_with_invalid_credentials&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginNegative::test_login_with_invalid_credentials&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginNegative::test_login_with_invalid_credentials&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:16:11,740 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:16:11,741 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:16:13,064 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:16:14,958 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:16:14,960 - tests.test_login - INFO - Starting test: Login with invalid credentials\n2026-06-22 14:16:21,336 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:16:21,549 - pages.login_page - INFO - Logging in with username: invalid_user\n2026-06-22 14:16:21,549 - pages.login_page - INFO - Entering username: invalid_user\n2026-06-22 14:16:21,872 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): invalid_user\n2026-06-22 14:16:21,872 - pages.login_page - INFO - Entering password\n2026-06-22 14:16:22,137 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): invalid_password\n2026-06-22 14:16:22,137 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:16:22,389 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:16:22,429 - pages.login_page - INFO - Error message displayed: True\n2026-06-22 14:16:22,486 - pages.login_page - INFO - Error message: Epic sadface: Username and password do not match any user in this service\n2026-06-22 14:16:22,487 - tests.test_login - INFO - Test passed: Error message displayed for invalid credentials\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:54 Starting test: Login with invalid credentials\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: invalid_user\nINFO     pages.login_page:login_page.py:29 Entering username: invalid_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): invalid_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): invalid_password\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.login_page:login_page.py:79 Error message displayed: True\nINFO     pages.login_page:login_page.py:68 Error message: Epic sadface: Username and password do not match any user in this service\nINFO     tests.test_login:test_login.py:65 Test passed: Error message displayed for invalid credentials\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:16:22,490 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginNegative::test_login_with_locked_out_user&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginNegative::test_login_with_locked_out_user&#34;, &#34;duration&#34;: &#34;00:00:13&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginNegative::test_login_with_locked_out_user&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:13&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:16:25,315 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:16:25,316 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:16:26,714 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:16:28,730 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:16:28,890 - tests.test_login - INFO - Starting test: Login with locked out user\n2026-06-22 14:16:34,337 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:16:34,337 - pages.login_page - INFO - Logging in with username: locked_out_user\n2026-06-22 14:16:34,338 - pages.login_page - INFO - Entering username: locked_out_user\n2026-06-22 14:16:34,739 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): locked_out_user\n2026-06-22 14:16:34,739 - pages.login_page - INFO - Entering password\n2026-06-22 14:16:34,986 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:16:34,986 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:16:35,202 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:16:35,251 - pages.login_page - INFO - Error message displayed: True\n2026-06-22 14:16:35,303 - pages.login_page - INFO - Error message: Epic sadface: Sorry, this user has been locked out.\n2026-06-22 14:16:35,303 - tests.test_login - INFO - Test passed: Locked out user cannot login\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:69 Starting test: Login with locked out user\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: locked_out_user\nINFO     pages.login_page:login_page.py:29 Entering username: locked_out_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): locked_out_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.login_page:login_page.py:79 Error message displayed: True\nINFO     pages.login_page:login_page.py:68 Error message: Epic sadface: Sorry, this user has been locked out.\nINFO     tests.test_login:test_login.py:80 Test passed: Locked out user cannot login\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:16:35,305 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginNegative::test_login_with_empty_username&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginNegative::test_login_with_empty_username&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginNegative::test_login_with_empty_username&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:16:38,127 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:16:38,128 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:16:39,456 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:16:41,757 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:16:41,759 - tests.test_login - INFO - Starting test: Login with empty username\n2026-06-22 14:16:48,101 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:16:48,102 - pages.login_page - INFO - Entering password\n2026-06-22 14:16:48,517 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:16:48,517 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:16:48,708 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:16:48,756 - pages.login_page - INFO - Error message displayed: True\n2026-06-22 14:16:48,818 - pages.login_page - INFO - Error message: Epic sadface: Username is required\n2026-06-22 14:16:48,818 - tests.test_login - INFO - Test passed: Error message displayed for empty username\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:84 Starting test: Login with empty username\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.login_page:login_page.py:79 Error message displayed: True\nINFO     pages.login_page:login_page.py:68 Error message: Epic sadface: Username is required\nINFO     tests.test_login:test_login.py:96 Test passed: Error message displayed for empty username\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:16:48,821 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_login.py::TestLoginNegative::test_login_with_empty_password&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_login.py::TestLoginNegative::test_login_with_empty_password&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_login.py::TestLoginNegative::test_login_with_empty_password&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:16:51,640 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:16:51,641 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:16:53,007 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:16:55,008 - conftest - INFO - WebDriver initialized: chrome\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:16:55,010 - tests.test_login - INFO - Starting test: Login with empty password\n2026-06-22 14:17:01,763 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:17:01,763 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:17:02,153 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:17:02,153 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:17:02,346 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n2026-06-22 14:17:02,392 - pages.login_page - INFO - Error message displayed: True\n2026-06-22 14:17:02,446 - pages.login_page - INFO - Error message: Epic sadface: Password is required\n2026-06-22 14:17:02,447 - tests.test_login - INFO - Test passed: Error message displayed for empty password\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_login:test_login.py:100 Starting test: Login with empty password\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\nINFO     pages.login_page:login_page.py:79 Error message displayed: True\nINFO     pages.login_page:login_page.py:68 Error message: Epic sadface: Password is required\nINFO     tests.test_login:test_login.py:112 Test passed: Error message displayed for empty password\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:17:02,449 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPagePositive::test_products_page_loads_successfully&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPagePositive::test_products_page_loads_successfully&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPagePositive::test_products_page_loads_successfully&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:17:05,265 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:17:05,266 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:17:06,586 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:17:09,124 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:17:16,862 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:17:16,862 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:17:16,863 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:17:17,250 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:17:17,250 - pages.login_page - INFO - Entering password\n2026-06-22 14:17:17,497 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:17:17,498 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:17:17,805 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:17:17,809 - tests.test_products - INFO - Starting test: Products page loads successfully\n2026-06-22 14:17:17,812 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:17:17,926 - pages.products_page - INFO - Products page loaded: True\n2026-06-22 14:17:17,936 - tests.test_products - INFO - Test passed: Products page loaded successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:28 Starting test: Products page loads successfully\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:36 Products page loaded: True\nINFO     tests.test_products:test_products.py:36 Test passed: Products page loaded successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:17:17,942 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPagePositive::test_products_displayed&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPagePositive::test_products_displayed&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPagePositive::test_products_displayed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:17:21,075 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:17:21,076 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:17:22,393 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:17:24,393 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:17:30,437 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:17:30,438 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:17:30,438 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:17:30,850 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:17:30,850 - pages.login_page - INFO - Entering password\n2026-06-22 14:17:31,102 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:17:31,103 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:17:31,419 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:17:31,435 - tests.test_products - INFO - Starting test: Products are displayed\n2026-06-22 14:17:31,435 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:17:31,539 - pages.products_page - INFO - Total products: 6\n2026-06-22 14:17:31,756 - pages.products_page - INFO - Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\n2026-06-22 14:17:31,756 - tests.test_products - INFO - Test passed: 6 products displayed\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:40 Starting test: Products are displayed\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:48 Total products: 6\nINFO     pages.products_page:products_page.py:60 Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\nINFO     tests.test_products:test_products.py:51 Test passed: 6 products displayed\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:17:31,759 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPagePositive::test_add_single_product_to_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPagePositive::test_add_single_product_to_cart&#34;, &#34;duration&#34;: &#34;00:00:15&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPagePositive::test_add_single_product_to_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:15&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:17:34,615 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:17:34,615 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:17:35,943 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:17:37,791 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:17:45,455 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:17:45,455 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:17:45,456 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:17:45,877 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:17:45,877 - pages.login_page - INFO - Entering password\n2026-06-22 14:17:46,099 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:17:46,099 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:17:46,378 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:17:46,381 - tests.test_products - INFO - Starting test: Add single product to cart\n2026-06-22 14:17:46,382 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:17:46,737 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:17:46,802 - pages.products_page - INFO - Cart badge count: 1\n2026-06-22 14:17:46,802 - tests.test_products - INFO - Test passed: Single product added to cart\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:55 Starting test: Add single product to cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:105 Cart badge count: 1\nINFO     tests.test_products:test_products.py:65 Test passed: Single product added to cart\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:17:46,804 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPagePositive::test_add_multiple_products_to_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPagePositive::test_add_multiple_products_to_cart&#34;, &#34;duration&#34;: &#34;00:00:15&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPagePositive::test_add_multiple_products_to_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:15&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:17:49,847 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:17:49,849 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:17:51,094 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:17:53,227 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:17:59,850 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:17:59,851 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:17:59,851 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:18:00,250 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:18:00,251 - pages.login_page - INFO - Entering password\n2026-06-22 14:18:00,501 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:18:00,502 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:18:00,782 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:18:00,786 - tests.test_products - INFO - Starting test: Add multiple products to cart\n2026-06-22 14:18:00,790 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:18:01,116 - pages.products_page - INFO - Added product at index 0 to cart\n2026-06-22 14:18:01,324 - pages.products_page - INFO - Added product at index 1 to cart\n2026-06-22 14:18:01,473 - pages.products_page - INFO - Added product at index 2 to cart\n2026-06-22 14:18:01,532 - pages.products_page - INFO - Cart badge count: 3\n2026-06-22 14:18:01,532 - tests.test_products - INFO - Test passed: Multiple products added to cart\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:69 Starting test: Add multiple products to cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:74 Added product at index 0 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 1 to cart\nINFO     pages.products_page:products_page.py:74 Added product at index 2 to cart\nINFO     pages.products_page:products_page.py:105 Cart badge count: 3\nINFO     tests.test_products:test_products.py:81 Test passed: Multiple products added to cart\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:18:01,535 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPagePositive::test_add_product_by_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPagePositive::test_add_product_by_name&#34;, &#34;duration&#34;: &#34;00:00:14&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPagePositive::test_add_product_by_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:14&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:18:04,411 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:18:04,412 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:18:05,735 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:18:07,692 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:18:14,351 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:18:14,351 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:18:14,352 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:18:14,759 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:18:14,760 - pages.login_page - INFO - Entering password\n2026-06-22 14:18:15,003 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:18:15,004 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:18:15,328 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:18:15,331 - tests.test_products - INFO - Starting test: Add product by name\n2026-06-22 14:18:15,332 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:18:15,584 - pages.products_page - INFO - Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\n2026-06-22 14:18:15,760 - pages.products_page - INFO - Added product &amp;#x27;Sauce Labs Backpack&amp;#x27; to cart\n2026-06-22 14:18:15,809 - pages.products_page - INFO - Cart badge count: 1\n2026-06-22 14:18:15,809 - tests.test_products - INFO - Test passed: Product &amp;#x27;Sauce Labs Backpack&amp;#x27; added to cart\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:85 Starting test: Add product by name\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:60 Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\nINFO     pages.products_page:products_page.py:91 Added product &amp;#x27;Sauce Labs Backpack&amp;#x27; to cart\nINFO     pages.products_page:products_page.py:105 Cart badge count: 1\nINFO     tests.test_products:test_products.py:98 Test passed: Product &amp;#x27;Sauce Labs Backpack&amp;#x27; added to cart\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:18:15,812 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPageNegative::test_add_nonexistent_product_to_cart&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPageNegative::test_add_nonexistent_product_to_cart&#34;, &#34;duration&#34;: &#34;00:00:40&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPageNegative::test_add_nonexistent_product_to_cart&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:40&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:18:18,770 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:18:18,771 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:18:20,093 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:18:22,395 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:18:32,843 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:18:32,843 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:18:32,843 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:18:33,225 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:18:33,225 - pages.login_page - INFO - Entering password\n2026-06-22 14:18:33,470 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:18:33,471 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:18:33,764 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:18:33,767 - tests.test_products - INFO - Starting test: Add non-existent product to cart\n2026-06-22 14:18:33,768 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:18:34,084 - pages.products_page - WARNING - Product &amp;#x27;NonExistentProduct&amp;#x27; not found\n2026-06-22 14:18:54,790 - pages.base_page - ERROR - Failed to find element (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_badge&amp;#x27;): Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x7ff7b444aa55\n\t0x7ff7b41a8630\n\t0x7ff7b3f3d75d\n\t0x7ff7b3f9862e\n\t0x7ff7b3f9893c\n\t0x7ff7b3fe8d87\n\t0x7ff7b3fe591c\n\t0x7ff7b3f89098\n\t0x7ff7b3f89f83\n\t0x7ff7b4477810\n\t0x7ff7b4471afd\n\t0x7ff7b4492c1a\n\t0x7ff7b41c3345\n\t0x7ff7b41cb81c\n\t0x7ff7b41b1924\n\t0x7ff7b41b1ad6\n\t0x7ff7b4197e47\n\t0x7ffe40237614\n\t0x7ffe405426f1\n\n2026-06-22 14:18:54,790 - pages.base_page - ERROR - Failed to get text from element (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_badge&amp;#x27;): Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x7ff7b444aa55\n\t0x7ff7b41a8630\n\t0x7ff7b3f3d75d\n\t0x7ff7b3f9862e\n\t0x7ff7b3f9893c\n\t0x7ff7b3fe8d87\n\t0x7ff7b3fe591c\n\t0x7ff7b3f89098\n\t0x7ff7b3f89f83\n\t0x7ff7b4477810\n\t0x7ff7b4471afd\n\t0x7ff7b4492c1a\n\t0x7ff7b41c3345\n\t0x7ff7b41cb81c\n\t0x7ff7b41b1924\n\t0x7ff7b41b1ad6\n\t0x7ff7b4197e47\n\t0x7ffe40237614\n\t0x7ffe405426f1\n\n2026-06-22 14:18:54,790 - pages.products_page - INFO - Cart badge not found or empty\n2026-06-22 14:18:54,791 - tests.test_products - INFO - Test passed: Non-existent product not added to cart\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:108 Starting test: Add non-existent product to cart\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nWARNING  pages.products_page:products_page.py:93 Product &amp;#x27;NonExistentProduct&amp;#x27; not found\nERROR    pages.base_page:base_page.py:33 Failed to find element (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_badge&amp;#x27;): Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x7ff7b444aa55\n\t0x7ff7b41a8630\n\t0x7ff7b3f3d75d\n\t0x7ff7b3f9862e\n\t0x7ff7b3f9893c\n\t0x7ff7b3fe8d87\n\t0x7ff7b3fe591c\n\t0x7ff7b3f89098\n\t0x7ff7b3f89f83\n\t0x7ff7b4477810\n\t0x7ff7b4471afd\n\t0x7ff7b4492c1a\n\t0x7ff7b41c3345\n\t0x7ff7b41cb81c\n\t0x7ff7b41b1924\n\t0x7ff7b41b1ad6\n\t0x7ff7b4197e47\n\t0x7ffe40237614\n\t0x7ffe405426f1\n\nERROR    pages.base_page:base_page.py:102 Failed to get text from element (&amp;#x27;class name&amp;#x27;, &amp;#x27;shopping_cart_badge&amp;#x27;): Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x7ff7b444aa55\n\t0x7ff7b41a8630\n\t0x7ff7b3f3d75d\n\t0x7ff7b3f9862e\n\t0x7ff7b3f9893c\n\t0x7ff7b3fe8d87\n\t0x7ff7b3fe591c\n\t0x7ff7b3f89098\n\t0x7ff7b3f89f83\n\t0x7ff7b4477810\n\t0x7ff7b4471afd\n\t0x7ff7b4492c1a\n\t0x7ff7b41c3345\n\t0x7ff7b41cb81c\n\t0x7ff7b41b1924\n\t0x7ff7b41b1ad6\n\t0x7ff7b4197e47\n\t0x7ffe40237614\n\t0x7ffe405426f1\n\nINFO     pages.products_page:products_page.py:108 Cart badge not found or empty\nINFO     tests.test_products:test_products.py:118 Test passed: Non-existent product not added to cart\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:18:54,827 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}], &#34;tests/test_products.py::TestProductsPageNegative::test_sort_products&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_products.py::TestProductsPageNegative::test_sort_products&#34;, &#34;duration&#34;: &#34;00:00:16&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_products.py::TestProductsPageNegative::test_sort_products&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:16&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-06-22 14:18:58,652 - conftest - INFO - Initializing WebDriver\n2026-06-22 14:18:58,653 - WDM - INFO - ====== WebDriver manager ======\n2026-06-22 14:18:59,915 - WDM - INFO - Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\n2026-06-22 14:19:02,143 - conftest - INFO - WebDriver initialized: chrome\n2026-06-22 14:19:09,161 - pages.login_page - INFO - LoginPage initialized\n2026-06-22 14:19:09,162 - pages.login_page - INFO - Logging in with username: standard_user\n2026-06-22 14:19:09,162 - pages.login_page - INFO - Entering username: standard_user\n2026-06-22 14:19:09,583 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\n2026-06-22 14:19:09,583 - pages.login_page - INFO - Entering password\n2026-06-22 14:19:09,848 - pages.base_page - INFO - Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\n2026-06-22 14:19:09,849 - pages.login_page - INFO - Clicking login button\n2026-06-22 14:19:10,201 - pages.base_page - INFO - Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n------------------------------ Captured log setup ------------------------------\nINFO     conftest:conftest.py:34 Initializing WebDriver\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Driver [C:\\Users\\JaelN\\.wdm\\drivers\\chromedriver\\win64\\145.0.7632.117\\chromedriver-win64/chromedriver.exe] found in cache by browser version\nINFO     conftest:conftest.py:79 WebDriver initialized: chrome\nINFO     pages.login_page:login_page.py:20 LoginPage initialized\nINFO     pages.login_page:login_page.py:55 Logging in with username: standard_user\nINFO     pages.login_page:login_page.py:29 Entering username: standard_user\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;user-name&amp;#x27;): standard_user\nINFO     pages.login_page:login_page.py:39 Entering password\nINFO     pages.base_page:base_page.py:81 Sent keys to element (&amp;#x27;id&amp;#x27;, &amp;#x27;password&amp;#x27;): secret_sauce\nINFO     pages.login_page:login_page.py:44 Clicking login button\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;id&amp;#x27;, &amp;#x27;login-button&amp;#x27;)\n\n----------------------------- Captured stderr call -----------------------------\n2026-06-22 14:19:10,204 - tests.test_products - INFO - Starting test: Sort products\n2026-06-22 14:19:10,218 - pages.products_page - INFO - ProductsPage initialized\n2026-06-22 14:19:10,509 - pages.products_page - INFO - Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\n2026-06-22 14:19:10,510 - pages.products_page - INFO - Sorting products by: za\n2026-06-22 14:19:10,744 - pages.base_page - INFO - Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;product_sort_container&amp;#x27;)\n2026-06-22 14:19:11,361 - pages.base_page - INFO - Clicked element: (&amp;#x27;xpath&amp;#x27;, &amp;quot;//option[@value=&amp;#x27;za&amp;#x27;]&amp;quot;)\n2026-06-22 14:19:11,550 - pages.products_page - INFO - Product names: [&amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Backpack&amp;#x27;]\n2026-06-22 14:19:11,551 - tests.test_products - INFO - Test passed: Products sorted successfully\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.test_products:test_products.py:122 Starting test: Sort products\nINFO     pages.products_page:products_page.py:26 ProductsPage initialized\nINFO     pages.products_page:products_page.py:60 Product names: [&amp;#x27;Sauce Labs Backpack&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;]\nINFO     pages.products_page:products_page.py:123 Sorting products by: za\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;class name&amp;#x27;, &amp;#x27;product_sort_container&amp;#x27;)\nINFO     pages.base_page:base_page.py:64 Clicked element: (&amp;#x27;xpath&amp;#x27;, &amp;quot;//option[@value=&amp;#x27;za&amp;#x27;]&amp;quot;)\nINFO     pages.products_page:products_page.py:60 Product names: [&amp;#x27;Test.allTheThings() T-Shirt (Red)&amp;#x27;, &amp;#x27;Sauce Labs Onesie&amp;#x27;, &amp;#x27;Sauce Labs Fleece Jacket&amp;#x27;, &amp;#x27;Sauce Labs Bolt T-Shirt&amp;#x27;, &amp;#x27;Sauce Labs Bike Light&amp;#x27;, &amp;#x27;Sauce Labs Backpack&amp;#x27;]\nINFO     tests.test_products:test_products.py:134 Test passed: Products sorted successfully\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-06-22 14:19:11,553 - conftest - INFO - Closing WebDriver\n\n---------------------------- Captured log teardown -----------------------------\nINFO     conftest:conftest.py:84 Closing WebDriver&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>
